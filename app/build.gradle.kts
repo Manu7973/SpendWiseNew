@@ -3,14 +3,15 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     id("kotlin-kapt")
+    id("com.google.gms.google-services")
 }
 
 android {
-    namespace = "com.zobase.expensetracker"
+    namespace = "com.mine.expensetracker"
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "com.zobase.expensetracker"
+        applicationId = "com.mine.expensetracker"
         minSdk = 28
         targetSdk = 35
         versionCode = 1
@@ -39,7 +40,7 @@ android {
         compose = true
     }
 
-    viewBinding{
+    viewBinding {
         enable = true
     }
 }
@@ -73,6 +74,7 @@ dependencies {
     //Coroutines
     implementation(libs.kotlinx.coroutines.core)
     implementation(libs.kotlinx.coroutines.android)
+    implementation (libs.coil.compose)
 
     //Layout
     implementation (libs.androidx.constraintlayout)
@@ -85,6 +87,11 @@ dependencies {
     implementation(libs.material3)
     implementation(libs.material)
     implementation (libs.androidx.material3.v121)
+
+    //Firebase
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.auth.ktx)
+    implementation(libs.play.services.auth)
 
     //Hilt
     implementation (libs.androidx.hilt.navigation.compose)

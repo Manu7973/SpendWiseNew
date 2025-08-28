@@ -8,9 +8,11 @@
     <string name="featureUnavailable">Feature will be available soon!</string>
     <string name="passwordResetInfo">Please contact admin for password reset!</string>
     <string name="registerUser">One last step to get you started!</string>
+    <string name="profilePicStatus">Profile pic updated successfully!</string>
 
-    <string name="loginWelcome">Welcome back! Glad to see you again, Again!</string>
+    <string name="loginWelcome">Welcome back! Glad to see you, Again!</string>
     <string name="loginUserName">Enter your name</string>
+    <string name="loginUserEmail">Enter your email</string>
     <string name="loginPassword">Enter your password</string>
     <string name="login">Login</string>
     <string name="loginAsGuest">Continue as Guest</string>
