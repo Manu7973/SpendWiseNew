@@ -9,6 +9,9 @@
     <string name="passwordResetInfo">Please contact admin for password reset!</string>
     <string name="registerUser">One last step to get you started!</string>
     <string name="profilePicStatus">Profile pic updated successfully!</string>
+    <string name="invalidRequest">Invalid Request</string>
+    <string name="logoutWarning">Don\'t worry, your data will remain safe here!</string>
+    <string name="profileUpdate">Profile updated successfully</string>
 
     <string name="loginWelcome">Welcome back! Glad to see you, Again!</string>
     <string name="loginUserName">Enter your name</string>

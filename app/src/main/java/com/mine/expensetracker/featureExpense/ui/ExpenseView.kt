@@ -75,8 +75,12 @@ import com.airbnb.lottie.compose.LottieCompositionSpec
 import com.airbnb.lottie.compose.LottieConstants
 import com.airbnb.lottie.compose.rememberLottieComposition
 import com.expense.expensetracker.utils.CustomToast
+import com.mine.expensetracker.FeatureExtSettings.ui.CustomExtSettings
 import com.mine.expensetracker.data.local.db.entity.ExpenseEntity
+import com.mine.expensetracker.featureHome.ui.MainActivity
+import com.mine.expensetracker.featureProfileSettings.ui.ProfileSettings
 import com.mine.expensetracker.featureProfileSettings.viewmodel.ProfileViewModel
+import com.mine.expensetracker.featureWallet.ui.ExpenseWallet
 import com.mine.expensetracker.ui.theme.ExtraThinThemePrimary
 import com.mine.expensetracker.ui.theme.Grey
 import com.mine.expensetracker.ui.theme.Secondary
@@ -112,77 +116,92 @@ class ExpenseView {
         val insets = WindowInsets.statusBars.asPaddingValues()
         val topPadding = min(insets.calculateTopPadding(), 20.dp)
 
+        var showNotifications by remember { mutableStateOf(false) }
+        var showProfileView by remember { mutableStateOf(false) }
+
         Box(modifier = Modifier.fillMaxSize()) {
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(ThemeBG)
-                    .padding(top = topPadding)
-            ) {
-                // Top Section
-                Column(
-                    modifier = Modifier
-                        .weight(0.3f)
-                        .fillMaxWidth()
-                        .background(ThemeBG)
-                ) {
-                    Header(context, profileViewModel, onProfileClick = {
-                    }, onNotificationClick = {
-                        CustomToast.showToast(context, "Feature will be available soon!", false)
-                    })
-                }
-
-                // Bottom Rounded White Section
-                Column(
-                    modifier = Modifier
-                        .weight(0.7f)
-                        .fillMaxWidth()
-                        .clip(RoundedCornerShape(topStart = 34.dp, topEnd = 34.dp))
-                        .background(Secondary)
-                        .padding(top = topPadding + 60.dp)
-                ) {
-                    ActionButtonsRow(context, expenseViewModel)
-
-                    Spacer(modifier = Modifier.height(12.dp))
-
-                    Text(
-                        text = "Transactions",
-                        fontSize = 20.sp,
-                        color = TextBlack,
-                        modifier = Modifier.padding(top = 20.dp, start = 20.dp),
-                        fontWeight = FontWeight.SemiBold
-                    )
-
-                    if (expenses.isEmpty()) {
-                        Text(
-                            text = "No Transactions Available!",
-                            fontSize = 18.sp,
-                            color = Grey,
-                            modifier = Modifier.padding(top = 40.dp, start = 20.dp),
-                            fontWeight = FontWeight.Medium
-                        )
-                    } else {
-                        LazyColumn(
+            if (showNotifications) {
+                CustomExtSettings().Notifications(
+                    context,
+                    onBack = { showNotifications = false }
+                )
+            } else if (showProfileView) {
+                CustomExtSettings().EditProfile(context, onBack = { showNotifications = false })
+            } else {
+                Box(modifier = Modifier.fillMaxSize()) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(ThemeBG)
+                            .padding(top = topPadding)
+                    ) {
+                        // Top Section
+                        Column(
                             modifier = Modifier
+                                .weight(0.3f)
                                 .fillMaxWidth()
-                                .padding(top = 10.dp, bottom = 5.dp),
-                            contentPadding = PaddingValues(horizontal = 16.dp),
-                            verticalArrangement = Arrangement.spacedBy(20.dp)
+                                .background(ThemeBG)
                         ) {
-                            items(expenses) { expense ->
-                                Transactions(expense) //Composable that renders a single expense
+                            Header(context, profileViewModel, onProfileClick = {
+
+                            }, onNotificationClick = {
+                                showNotifications = true
+                            })
+                        }
+
+                        // Bottom Rounded White Section
+                        Column(
+                            modifier = Modifier
+                                .weight(0.7f)
+                                .fillMaxWidth()
+                                .clip(RoundedCornerShape(topStart = 34.dp, topEnd = 34.dp))
+                                .background(Secondary)
+                                .padding(top = topPadding + 60.dp)
+                        ) {
+                            ActionButtonsRow(context, expenseViewModel)
+
+                            Spacer(modifier = Modifier.height(12.dp))
+
+                            Text(
+                                text = "Transactions",
+                                fontSize = 20.sp,
+                                color = TextBlack,
+                                modifier = Modifier.padding(top = 20.dp, start = 20.dp),
+                                fontWeight = FontWeight.SemiBold
+                            )
+
+                            if (expenses.isEmpty()) {
+                                Text(
+                                    text = "No Transactions Available!",
+                                    fontSize = 18.sp,
+                                    color = Grey,
+                                    modifier = Modifier.padding(top = 40.dp, start = 20.dp),
+                                    fontWeight = FontWeight.Medium
+                                )
+                            } else {
+                                LazyColumn(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(top = 10.dp, bottom = 5.dp),
+                                    contentPadding = PaddingValues(horizontal = 16.dp),
+                                    verticalArrangement = Arrangement.spacedBy(20.dp)
+                                ) {
+                                    items(expenses) { expense ->
+                                        Transactions(expense) //Composable that renders a single expense
+                                    }
+                                }
                             }
                         }
                     }
-                }
-            }
 
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = topPadding + 60.dp)
-            ) {
-                BudgetCard(expenseViewModel)
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = topPadding + 60.dp)
+                    ) {
+                        BudgetCard(expenseViewModel)
+                    }
+                }
             }
         }
     }
@@ -220,7 +239,7 @@ class ExpenseView {
                             .background(ThemePrimary),
                         contentScale = ContentScale.Crop
                     )
-                }else{
+                } else {
                     val profile by rememberLottieComposition(
                         LottieCompositionSpec.RawRes(R.raw.profile_dummy)
                     )
@@ -615,13 +634,13 @@ class ExpenseView {
         note: String,
         paymentMode: String
     ): Boolean {
-        if (amount.isEmpty() || amount.isBlank() && amount.toInt() <= 0) {
-            CustomToast.showToast(context, "Please enter a valid Amount", false)
+        if (expenseType.isBlank()) {
+            CustomToast.showToast(context, "Please select expense type", false)
             return false
         }
 
-        if (expenseType.isBlank()) {
-            CustomToast.showToast(context, "Please select expense type", false)
+        if (amount.isEmpty() || amount.isBlank() && amount.toInt() <= 0) {
+            CustomToast.showToast(context, "Please enter a valid Amount", false)
             return false
         }
 

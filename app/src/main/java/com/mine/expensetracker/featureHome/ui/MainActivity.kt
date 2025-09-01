@@ -110,7 +110,6 @@ class MainActivity : AppCompatActivity() {
             Box(modifier = Modifier.padding(paddingValues)) {
                 //Navigate b/w features.
                 when (currentTab) {
-//                    0 -> ProfileSettings().ShowProfile(this@MainActivity, profileViewModel)
                     0 -> ExpenseView().ShowExpenseView(this@MainActivity, expenseViewModel, profileViewModel)
                     1 -> ExpenseReportView().ShowReportScreen(this@MainActivity, expenseViewModel)
                     2 -> ExpenseWallet().ShowWallet(this@MainActivity,expenseViewModel)
