@@ -6,10 +6,13 @@
     <string name="registerAccountClick"> Register Now</string>
     <string name="forgotPassword">Forgot Password?</string>
     <string name="featureUnavailable">Feature will be available soon!</string>
+    <string name="guestUserMessageLogin">Please login to avail this feature!</string>
     <string name="passwordResetInfo">Please contact admin for password reset!</string>
     <string name="registerUser">One last step to get you started!</string>
     <string name="profilePicStatus">Profile pic updated successfully!</string>
     <string name="invalidRequest">Invalid Request</string>
+    <string name="settleUpSplit">You are all settled up!</string>
+    <string name="somethingWentWrong">Something went wrong. Please try again later</string>
     <string name="logoutWarning">Don\'t worry, your data will remain safe here!</string>
     <string name="profileUpdate">Profile updated successfully</string>
 
@@ -19,5 +22,8 @@
     <string name="loginPassword">Enter your password</string>
     <string name="login">Login</string>
     <string name="loginAsGuest">Continue as Guest</string>
+
+    <string name="featureWallet">Wallet</string>
+    <string name="featureReport">Insight</string>
 
 </resources>

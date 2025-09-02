@@ -122,7 +122,7 @@ class ExpenseReportView {
         ) {
             Text(
                 modifier = Modifier.padding(top = 10.dp, bottom = 15.dp),
-                text = "Insight",
+                text = context.getString(R.string.featureReport),
                 fontSize = 20.sp,
                 fontWeight = FontWeight.SemiBold,
                 color = TextBlack,

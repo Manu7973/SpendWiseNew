@@ -5,6 +5,7 @@ coilCompose = "2.6.0"
 constraintlayoutCompose = "1.0.1"
 coreSplashscreen = "1.0.1"
 firebaseBom = "33.16.0"
+firebaseBomVersion = "33.2.0"
 foundation = "1.8.3"
 gson = "2.13.1"
 hiltAndroid = "2.49"
@@ -42,6 +43,8 @@ androidx-material3-v121 = { module = "androidx.compose.material3:material3", ver
 coil-compose = { module = "io.coil-kt:coil-compose", version.ref = "coilCompose" }
 firebase-auth-ktx = { module = "com.google.firebase:firebase-auth-ktx" }
 firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebaseBom" }
+firebase-bom-v3320 = { module = "com.google.firebase:firebase-bom", version.ref = "firebaseBomVersion" }
+firebase-database = { module = "com.google.firebase:firebase-database" }
 glide = { module = "com.github.bumptech.glide:glide", version.ref = "glide" }
 gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }

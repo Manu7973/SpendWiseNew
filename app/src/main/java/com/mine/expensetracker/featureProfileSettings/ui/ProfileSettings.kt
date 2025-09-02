@@ -82,6 +82,7 @@ import androidx.compose.runtime.setValue
 import androidx.navigation.NavHostController
 import com.expense.expensetracker.utils.CustomToast
 import com.mine.expensetracker.FeatureExtSettings.ui.CustomExtSettings
+import com.mine.expensetracker.ui.theme.Grey
 import com.mine.expensetracker.ui.theme.ThemeBG
 import com.mine.expensetracker.utils.Constants
 import com.mine.expensetracker.utils.CustomDialogs
@@ -204,10 +205,10 @@ class ProfileSettings() {
                 ) {
                     Text(
                         text = SharedPref.getString(context, Constants.EMAIL),
-                        fontSize = 16.sp,
+                        fontSize = 15.sp,
                         fontStyle = FontStyle.Normal,
                         fontWeight = FontWeight.Normal,
-                        color = Blue
+                        color = Grey
                     )
                 }
 

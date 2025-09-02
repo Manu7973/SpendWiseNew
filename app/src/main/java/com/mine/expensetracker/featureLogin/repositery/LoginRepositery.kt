@@ -7,13 +7,13 @@ import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.FirebaseDatabase
 import com.mine.expensetracker.data.prefrences.SharedPref
 import com.mine.expensetracker.utils.Constants
 import kotlinx.coroutines.tasks.await
 
 //Repository for login
 class LoginRepository(private val context: Context) {
-
     private val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
         .requestEmail()
         .build()
@@ -44,7 +44,16 @@ class LoginRepository(private val context: Context) {
             val uniqueId = account.id
             if (uniqueId != null) {
                 saveUID(uniqueId)
-            }else{
+                val userMap = mapOf(
+                    "uid" to account.id,
+                    "name" to account.displayName.orEmpty(),
+                    "email" to account.email.orEmpty()
+                )
+                FirebaseDatabase.getInstance().reference
+                    .child("users")
+                    .child(uniqueId)
+                    .setValue(userMap)
+            } else {
                 saveUID("")
             }
             Result.success(task.getResult(ApiException::class.java))
@@ -56,11 +65,25 @@ class LoginRepository(private val context: Context) {
     suspend fun loginWithEmail(email: String, password: String): Boolean {
         return try {
             val result = firebaseAuth.signInWithEmailAndPassword(email, password).await()
-            if(result.user!=null){
-                saveUID(result.user?.uid ?: "")
-                return true
-            }else{
-                return false
+            val user = result.user
+            if (user != null) {
+                val id = user.uid
+                saveUID(id)
+
+                val userMap = mapOf(
+                    "uid" to id,
+                    "name" to (user.displayName ?: ""),
+                    "email" to (user.email ?: email)
+                )
+
+                FirebaseDatabase.getInstance().reference
+                    .child("users")
+                    .child(id)
+                    .setValue(userMap)
+
+                true
+            } else {
+                false
             }
         } catch (e: Exception) {
             false

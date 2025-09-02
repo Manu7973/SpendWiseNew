@@ -68,7 +68,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.min
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
-import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.rememberAsyncImagePainter
 import com.airbnb.lottie.compose.LottieAnimation
 import com.airbnb.lottie.compose.LottieCompositionSpec
@@ -77,10 +76,7 @@ import com.airbnb.lottie.compose.rememberLottieComposition
 import com.expense.expensetracker.utils.CustomToast
 import com.mine.expensetracker.FeatureExtSettings.ui.CustomExtSettings
 import com.mine.expensetracker.data.local.db.entity.ExpenseEntity
-import com.mine.expensetracker.featureHome.ui.MainActivity
-import com.mine.expensetracker.featureProfileSettings.ui.ProfileSettings
 import com.mine.expensetracker.featureProfileSettings.viewmodel.ProfileViewModel
-import com.mine.expensetracker.featureWallet.ui.ExpenseWallet
 import com.mine.expensetracker.ui.theme.ExtraThinThemePrimary
 import com.mine.expensetracker.ui.theme.Grey
 import com.mine.expensetracker.ui.theme.Secondary

@@ -92,6 +92,9 @@ dependencies {
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.auth.ktx)
     implementation(libs.play.services.auth)
+    implementation(libs.firebase.bom.v3320)
+//    implementation("com.google.firebase:firebase-auth")
+    implementation(libs.firebase.database)
 
     //Hilt
     implementation (libs.androidx.hilt.navigation.compose)

@@ -1,6 +1,7 @@
 package com.mine.expensetracker.featureHome.ui
 
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
@@ -16,26 +17,32 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.mine.expensetracker.R
 import com.mine.expensetracker.data.local.db.ExpenseInstance
+import com.mine.expensetracker.data.prefrences.SharedPref
 import com.mine.expensetracker.data.repositery.ExpenseRepositery
 import com.mine.expensetracker.featureExpense.ui.ExpenseView
 import com.mine.expensetracker.featureExpenseReport.ui.ExpenseReportView
 import com.mine.expensetracker.featureProfileSettings.ui.ProfileSettings
 import com.mine.expensetracker.featureProfileSettings.viewmodel.ProfileViewModel
+import com.mine.expensetracker.featureWallet.ViewModelFactory.FriendsViewModelFactory
+import com.mine.expensetracker.featureWallet.repositery.FriendsRepository
 import com.mine.expensetracker.featureWallet.ui.ExpenseWallet
+import com.mine.expensetracker.featureWallet.viewmodel.FriendsViewModel
 import com.mine.expensetracker.ui.theme.Black
 import com.mine.expensetracker.ui.theme.Secondary
 import com.mine.expensetracker.ui.theme.ThemePrimary
+import com.mine.expensetracker.utils.Constants
 import com.mine.expensetracker.viewmodel.ExpenseViewModel
 import com.mine.expensetracker.viewmodel.viewmodelfactory.ExpenseViewModelFactory
 
 class MainActivity : AppCompatActivity() {
-
-    private lateinit var expenseViewModel: ExpenseViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -46,15 +53,21 @@ class MainActivity : AppCompatActivity() {
         val expenseRepository = ExpenseRepositery(expenseDao)
         val expenseFactory = ExpenseViewModelFactory(expenseRepository)
         val profileViewModel = ProfileViewModel(application)
-        expenseViewModel = ViewModelProvider(this, expenseFactory)[ExpenseViewModel::class.java]
+        val expenseViewModel = ViewModelProvider(this, expenseFactory)[ExpenseViewModel::class.java]
 
+        val friendsViewModel = ViewModelProvider(
+            this,
+            FriendsViewModelFactory(FriendsRepository(this@MainActivity))
+        )[FriendsViewModel::class.java]
+
+        Log.d("this@MainActivity", SharedPref.getString(this@MainActivity, Constants.UID))
         setContent {
-            MainScreen(expenseViewModel, profileViewModel)
+            MainScreen(expenseViewModel, profileViewModel, friendsViewModel)
         }
     }
 
     @Composable
-    fun MainScreen(expenseViewModel: ExpenseViewModel, profileViewModel: ProfileViewModel) {
+    fun MainScreen(expenseViewModel: ExpenseViewModel, profileViewModel: ProfileViewModel, friendsViewModel: FriendsViewModel) {
         var currentTab by remember { mutableIntStateOf(0) }
 
         val tabs = listOf(
@@ -110,9 +123,10 @@ class MainActivity : AppCompatActivity() {
             Box(modifier = Modifier.padding(paddingValues)) {
                 //Navigate b/w features.
                 when (currentTab) {
-                    0 -> ExpenseView().ShowExpenseView(this@MainActivity, expenseViewModel, profileViewModel)
+//                    0 -> ExpenseView().ShowExpenseView(this@MainActivity, expenseViewModel, profileViewModel)
+                    0 ->  ExpenseWallet().ShowWallet(this@MainActivity,friendsViewModel)
                     1 -> ExpenseReportView().ShowReportScreen(this@MainActivity, expenseViewModel)
-                    2 -> ExpenseWallet().ShowWallet(this@MainActivity,expenseViewModel)
+                    2 -> ExpenseWallet().ShowWallet(this@MainActivity,friendsViewModel)
                     3 -> ProfileSettings().ShowProfile(this@MainActivity, profileViewModel)
                 }
             }

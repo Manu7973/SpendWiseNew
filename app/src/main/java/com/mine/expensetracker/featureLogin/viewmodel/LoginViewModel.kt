@@ -21,17 +21,19 @@ class LoginViewModel(private val repository: LoginRepository) : ViewModel() {
     }
 
     fun handleGoogleSignInResult(data: Intent?) {
-        val result = repository.handleGoogleSignInResult(data)
-        if (result.isSuccess) {
-            val account = result.getOrNull()
-            val username = account?.displayName ?: ""
-            val email = account?.email ?: ""
-            repository.saveUserData(username)
-            repository.saveEmailData(email)
-            loginSuccess = true
-            errorMessage = null
-        } else {
-            errorMessage = result.exceptionOrNull()?.message ?: "Google Sign-In failed"
+        viewModelScope.launch {
+            val result = repository.handleGoogleSignInResult(data)
+            if (result.isSuccess) {
+                val account = result.getOrNull()
+                val username = account?.displayName ?: ""
+                val email = account?.email ?: ""
+                repository.saveUserData(username)
+                repository.saveEmailData(email)
+                loginSuccess = true
+                errorMessage = null
+            } else {
+                errorMessage = result.exceptionOrNull()?.message ?: "Google Sign-In failed"
+            }
         }
     }
 

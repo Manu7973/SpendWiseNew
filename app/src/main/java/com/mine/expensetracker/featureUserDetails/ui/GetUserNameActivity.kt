@@ -1,6 +1,8 @@
 package com.mine.expensetracker.featureUserDetails.ui
 
+import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
@@ -32,6 +34,7 @@ import androidx.compose.ui.graphics.Color.Companion.Gray
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
@@ -39,13 +42,19 @@ import com.airbnb.lottie.compose.LottieAnimation
 import com.airbnb.lottie.compose.LottieCompositionSpec
 import com.airbnb.lottie.compose.LottieConstants
 import com.airbnb.lottie.compose.rememberLottieComposition
+import com.expense.expensetracker.utils.CustomToast
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.FirebaseDatabase
 import com.mine.expensetracker.R
+import com.mine.expensetracker.data.prefrences.SharedPref
+import com.mine.expensetracker.featureHome.ui.MainActivity
 import com.mine.expensetracker.ui.theme.Black
 import com.mine.expensetracker.ui.theme.Pink40
 import com.mine.expensetracker.ui.theme.Secondary
 import com.mine.expensetracker.ui.theme.ThinGrey
 import com.mine.expensetracker.ui.theme.ThinThemePrimary
 import com.mine.expensetracker.utils.AppUtils
+import com.mine.expensetracker.utils.Constants
 
 class GetUserNameActivity : AppCompatActivity() {
 
@@ -57,9 +66,32 @@ class GetUserNameActivity : AppCompatActivity() {
             backgroundColor = ContextCompat.getColor(this, R.color.white),
             false, false
         )
+
         enableEdgeToEdge()
         setContent {
             GetUserDetails { name ->
+                SharedPref.setString(this@GetUserNameActivity, Constants.USERNAME, name)
+                val uid = SharedPref.getString(this@GetUserNameActivity, Constants.UID)
+                if (uid != null) {
+                    val db = FirebaseDatabase.getInstance().getReference("users")
+                    val userMap = mapOf(
+                        "name" to name
+                    )
+
+                    db.child(uid).updateChildren(userMap)
+                        .addOnSuccessListener {
+                            Log.d("UserNameActivity", "Name saved successfully")
+                            val intent = Intent(this, MainActivity::class.java)
+                            startActivity(intent)
+                            finish()
+                        }
+                        .addOnFailureListener {
+                            Log.e("UserNameActivity", "Failed to save name", it)
+                            CustomToast.showToast(this, "Failed to save name!", false)
+                        }
+                } else {
+                    CustomToast.showToast(this, "User not logged in!", false)
+                }
             }
         }
     }
@@ -68,7 +100,7 @@ class GetUserNameActivity : AppCompatActivity() {
 @Composable
 fun GetUserDetails(onSubmit: (String) -> Unit) {
     var name by remember { mutableStateOf("") }
-    var email by remember { mutableStateOf("") }
+//    var email by remember { mutableStateOf("") }
     val context = LocalContext.current
 
     Box(
@@ -122,24 +154,24 @@ fun GetUserDetails(onSubmit: (String) -> Unit) {
                 )
             )
 
-            OutlinedTextField(
-                value = email,
-                onValueChange = { email = it },
-                placeholder = { Text("Your email") },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 20.dp),
-                shape = RoundedCornerShape(10.dp),
-                singleLine = true, colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = Black,
-                    unfocusedBorderColor = Gray,
-                    cursorColor = Black,
-                    focusedLabelColor = Black,
-                    unfocusedLabelColor = Gray,
-                    unfocusedContainerColor = ThinGrey,
-                    focusedContainerColor = ThinGrey
-                )
-            )
+//            OutlinedTextField(
+//                value = email,
+//                onValueChange = { email = it },
+//                placeholder = { Text("Your email") },
+//                modifier = Modifier
+//                    .fillMaxWidth()
+//                    .padding(top = 20.dp),
+//                shape = RoundedCornerShape(10.dp),
+//                singleLine = true, colors = OutlinedTextFieldDefaults.colors(
+//                    focusedBorderColor = Black,
+//                    unfocusedBorderColor = Gray,
+//                    cursorColor = Black,
+//                    focusedLabelColor = Black,
+//                    unfocusedLabelColor = Gray,
+//                    unfocusedContainerColor = ThinGrey,
+//                    focusedContainerColor = ThinGrey
+//                )
+//            )
 
             Button(
                 onClick = {
