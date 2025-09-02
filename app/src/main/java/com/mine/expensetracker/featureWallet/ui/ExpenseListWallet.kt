@@ -637,7 +637,7 @@ class ExpenseListWallet {
     fun textColors(): TextFieldColors {
         return TextFieldDefaults.colors(
             focusedTextColor = Grey,
-            unfocusedTextColor = ThinGrey,
+            unfocusedTextColor = Grey,
             disabledTextColor = ThinGrey,
             unfocusedLabelColor = Grey,
             focusedLabelColor = ThemePrimary,

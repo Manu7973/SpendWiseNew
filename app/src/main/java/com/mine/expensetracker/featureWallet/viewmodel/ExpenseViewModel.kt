@@ -38,14 +38,15 @@ class ExpenseViewModel(
         var netAmount = 0.0
         for (expense in expenses) {
             when (expense.type) {
-                ExpenseType.PAID_BY_YOU -> netAmount += expense.amount
-                ExpenseType.FRIEND_OWED_FULL -> netAmount += expense.amount
+                ExpenseType.PAID_BY_YOU -> netAmount += expense.amount / 2
+                ExpenseType.FRIEND_OWED_FULL -> netAmount -= expense.amount
                 ExpenseType.FRIEND_PAID_SPLIT -> netAmount -= expense.amount / 2
-                ExpenseType.YOU_OWED_FULL_AMOUNT -> netAmount -= expense.amount
+                ExpenseType.YOU_OWED_FULL_AMOUNT -> netAmount += expense.amount
             }
         }
         return netAmount
     }
+
 
     fun deleteExpense(expenseId: String, myId: String, friendId: String) {
         repository.deleteExpense(expenseId, myId, friendId)
