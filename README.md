@@ -9,8 +9,8 @@ It helps you easily manage, track, and analyze your expenses.
 - **Expense Tracking** – Add, edit, and view your daily expenses.
 - **Offline Mode** – Access and manage expenses without internet.
 - **Graphical Representation of Expenses** – View your spending trends with charts.
-- **Wallet** *(Upcoming)* – Track income and expenses in one place.
-- **Profile Settings** *(Upcoming)* – Customize your user profile.
+- **Wallet**  – Track income and expenses in one place.
+- **Profile Settings** – Customize your user profile.
 
 ## AI Usage summary 
 - Currently, SpendWise does not use AI-based features for expense tracking or analysis. 
