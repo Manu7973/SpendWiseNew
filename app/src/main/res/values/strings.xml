@@ -13,6 +13,9 @@
     <string name="invalidRequest">Invalid Request</string>
     <string name="settleUpSplit">You are all settled up!</string>
     <string name="somethingWentWrong">Something went wrong. Please try again later</string>
+    <string name="unableToProcess">Unable to process request!</string>
+    <string name="expenseDeleted">Expense Deleted Successfully</string>
+    <string name="settledup">All Expenses settled up</string>
     <string name="logoutWarning">Don\'t worry, your data will remain safe here!</string>
     <string name="profileUpdate">Profile updated successfully</string>
 

@@ -48,10 +48,12 @@ class ExpenseViewModel(
     }
 
 
-    fun deleteExpense(expenseId: String, myId: String, friendId: String) {
-        repository.deleteExpense(expenseId, myId, friendId)
-
+    fun deleteExpense(expenseId: String, myId: String, friendId: String, onResult: (Boolean) -> Unit) {
+        repository.deleteExpense(expenseId, myId, friendId, onResult)
     }
 
+    fun settleUpTransactions(expenseId: String, myId: String, friendId: String, onResult: (Boolean) -> Unit) {
+        repository.settleUpTransactions(expenseId, myId, friendId, onResult)
+    }
 
 }

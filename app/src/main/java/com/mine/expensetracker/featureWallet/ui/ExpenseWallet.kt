@@ -5,6 +5,8 @@ import android.content.Context
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -47,8 +49,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.filled.KeyboardArrowRight
 import androidx.compose.material3.Divider
+import androidx.compose.material3.TextButton
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Color.Companion.Gray
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.expense.expensetracker.utils.CustomToast
@@ -113,9 +117,9 @@ class ExpenseWallet {
     ) {
         val userType = SharedPref.getInt(context, Constants.LOGIN_TYPE)
         var showDialog by remember { mutableStateOf(false) }
+        var showDeleteFriendDialog by remember { mutableStateOf(false) }
         var friendCode by remember { mutableStateOf("") }
         var isError by remember { mutableStateOf(false) }
-        val myId = SharedPref.getString(context, Constants.UID)
 
         val friendsList by friendsViewModel.friends.collectAsState(initial = emptyList())
 
@@ -188,10 +192,53 @@ class ExpenseWallet {
                                 name = friend.name,
                                 status = status,
                                 statusColor = color,
-                                onClick = { onFriendClick(friend) }
+                                onClick = { onFriendClick(friend) },
+                                onLongClick = {
+                                    friendCode = friend.uid
+                                    showDeleteFriendDialog = true
+                                }
                             )
                         }
                     }
+                }
+
+                if (showDeleteFriendDialog) {
+                    AlertDialog(
+                        onDismissRequest = { showDeleteFriendDialog = false },
+                        title = { Text("Remove Friend") },
+                        text = { Text("Are you sure you want to remove friend from the list") },
+                        confirmButton = {
+                            TextButton(onClick = {
+                                friendsViewModel.removeFriend(
+                                    friendCode ,
+                                    onComplete = { success, message ->
+                                        {
+                                            if (success) {
+                                                CustomToast.showToast(
+                                                    context,
+                                                    message,
+                                                    false
+                                                )
+                                            } else {
+                                                CustomToast.showToast(
+                                                    context,
+                                                    context.getString(R.string.unableToProcess),
+                                                    false
+                                                )
+                                            }
+                                        }
+                                    })
+                                showDeleteFriendDialog = false
+                            }) {
+                                Text("Remove", color = Warning)
+                            }
+                        },
+                        dismissButton = {
+                            TextButton(onClick = { showDeleteFriendDialog = false }) {
+                                Text("Cancel", color = TextBlack)
+                            }
+                        }, containerColor = ThinGrey
+                    )
                 }
 
                 Box(
@@ -293,7 +340,8 @@ class ExpenseWallet {
         status: String,
         statusColor: Color,
         modifier: Modifier = Modifier,
-        onClick: (String) -> Unit // pass friend id/name back when clicked
+        onClick: (String) -> Unit, // pass friend id/name back when clicked
+        onLongClick: (String) -> Unit// pass friend id/name back when clicked
     ) {
         // Pick a stable random color
         val avatarColor = remember(name) {
@@ -303,7 +351,13 @@ class ExpenseWallet {
         Row(
             modifier = modifier
                 .fillMaxWidth()
-                .clickable { onClick(name) } // 👈 action on click
+                .pointerInput(Unit) {
+                    detectTapGestures(
+                        onTap = { onClick(name) },
+                        onLongPress = { onLongClick(name) }
+                    )
+                }
+//                .clickable { onClick(name) } // 👈 action on click
                 .padding(horizontal = 16.dp, vertical = 12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {

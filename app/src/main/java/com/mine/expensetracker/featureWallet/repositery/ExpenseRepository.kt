@@ -1,6 +1,7 @@
 package com.mine.expensetracker.featureWallet.repositery
 
 import android.util.Log
+import com.expense.expensetracker.utils.CustomToast
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
@@ -80,7 +81,11 @@ class ExpenseRepository {
         dbRef.updateChildren(updates)
     }
 
-    fun listenToExpenses(myId: String, friendId: String, onDataChanged: (List<ExpenseData>) -> Unit) {
+    fun listenToExpenses(
+        myId: String,
+        friendId: String,
+        onDataChanged: (List<ExpenseData>) -> Unit
+    ) {
         val dbRef = FirebaseDatabase.getInstance()
             .getReference("users")
             .child(myId)
@@ -106,7 +111,12 @@ class ExpenseRepository {
         })
     }
 
-    fun deleteExpense(expenseId: String, myId: String, friendId: String) {
+    fun deleteExpense(
+        expenseId: String,
+        myId: String,
+        friendId: String,
+        onResult: (Boolean) -> Unit
+    ) {
         val updates = hashMapOf<String, Any?>(
             "$myId/friends/$friendId/expenses/$expenseId" to null,
             "$friendId/friends/$myId/expenses/$expenseId" to null
@@ -115,9 +125,36 @@ class ExpenseRepository {
         dbRef.updateChildren(updates)
             .addOnSuccessListener {
                 Log.d("DeleteExpense", "Deleted successfully: $expenseId")
+                onResult(true)
             }
             .addOnFailureListener { e ->
                 Log.e("DeleteExpense", "Failed to delete", e)
+                onResult(false)
             }
     }
+
+    fun settleUpTransactions(
+        expenseId: String,
+        myId: String,
+        friendId: String,
+        onResult: (Boolean) -> Unit
+    ) {
+        val updates = hashMapOf<String, Any?>(
+            "$myId/friends/$friendId/expenses" to mapOf<String, Any>(),
+            "$friendId/friends/$myId/expenses" to mapOf<String, Any>(),
+            "$myId/friends/$friendId/isFriend" to true,
+            "$friendId/friends/$myId/isFriend" to true
+        )
+
+        dbRef.updateChildren(updates)
+            .addOnSuccessListener {
+                Log.d("SettleUp", "All expenses cleared but friendship kept")
+                onResult(true)
+            }
+            .addOnFailureListener { e ->
+                Log.e("SettleUp", "Failed to settle up", e)
+                onResult(false)
+            }
+    }
+
 }

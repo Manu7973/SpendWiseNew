@@ -32,4 +32,13 @@ class FriendsViewModel(private val repo: FriendsRepository) : ViewModel() {
             }
         }
     }
+
+    fun removeFriend(uniqueId: String, onComplete: (Boolean, String) -> Unit){
+        repo.removeFriend(uniqueId) { success, message ->
+            if (success) {
+                _friends.value = _friends.value.filter { it.uid != uniqueId }
+            }
+            onComplete(success, message)
+        }
+    }
 }

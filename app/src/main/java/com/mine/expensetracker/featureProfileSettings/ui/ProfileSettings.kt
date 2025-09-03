@@ -159,7 +159,7 @@ class ProfileSettings() {
                         painter = painterResource(id = R.drawable.dummy_display_pic),
                         contentDescription = "Profile Picture",
                         modifier = Modifier
-                            .size(120.dp)
+                            .size(120.dp).background(Grey)
                             .clip(CircleShape),
                         contentScale = ContentScale.Crop
                     )
@@ -319,13 +319,7 @@ class ProfileSettings() {
                 selectedScreen = "main_pop"
             })
 
-            "Share" -> {
-                CustomToast.showToast(
-                    context,
-                    context.getString(R.string.featureUnavailable),
-                    false
-                )
-            }
+            "Share" -> AppUtils().shareCode(context)
         }
 
         if (showLogoutDialog) {

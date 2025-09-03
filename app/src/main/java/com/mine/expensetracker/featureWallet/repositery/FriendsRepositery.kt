@@ -53,45 +53,79 @@ class FriendsRepository(
             }
     }
 
-
     //Fetch list of friends.
     fun fetchFriends(onResult: (List<FriendData>) -> Unit) {
-        if (currentUid == null) return
+        val myId = currentUid ?: return
 
-        db.child("users").child(currentUid).child("friends")
+        db.child("users").child(myId).child("friends")
             .addValueEventListener(object : ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
                     val friends = mutableListOf<FriendData>()
-                    val tasks = snapshot.children.mapNotNull { friendSnap ->
-                        val friendUid = friendSnap.key ?: return@mapNotNull null
-                        db.child("users").child(friendUid).get()
+
+                    snapshot.children.forEach { friendSnap ->
+                        val friendUid = friendSnap.key ?: return@forEach
+
+                        // 🔹 Listen to friend's name
+                        db.child("users").child(friendUid).child("name")
+                            .addValueEventListener(object : ValueEventListener {
+                                override fun onDataChange(nameSnap: DataSnapshot) {
+                                    val name = nameSnap.getValue(String::class.java) ?: "Unknown"
+
+                                    // 🔹 Listen to balance for this friend
+                                    val pairId = listOf(myId, friendUid).sorted().joinToString("_")
+                                    db.child("balances").child(pairId)
+                                        .addValueEventListener(object : ValueEventListener {
+                                            override fun onDataChange(balSnap: DataSnapshot) {
+                                                val balance =
+                                                    balSnap.child(myId).getValue(Double::class.java)
+                                                        ?: 0.0
+
+                                                // ✅ Update friend object
+                                                val existingIndex = friends.indexOfFirst { it.uid == friendUid }
+                                                if (existingIndex != -1) {
+                                                    friends[existingIndex] =
+                                                        friends[existingIndex].copy(
+                                                            name = name,
+                                                            balance = balance
+                                                        )
+                                                } else {
+                                                    friends.add(FriendData(friendUid, name, balance))
+                                                }
+
+                                                onResult(friends.toList())
+                                            }
+
+                                            override fun onCancelled(error: DatabaseError) {}
+                                        })
+                                }
+
+                                override fun onCancelled(error: DatabaseError) {}
+                            })
                     }
-
-                    Tasks.whenAllSuccess<DataSnapshot>(tasks)
-                        .addOnSuccessListener { results ->
-                            results.forEachIndexed { i, userSnap ->
-                                val friendUid =
-                                    snapshot.children.elementAt(i).key ?: return@forEachIndexed
-                                val name = userSnap.child("name").value as? String ?: "Unknown"
-
-                                val pairId =
-                                    listOf(currentUid, friendUid).sorted().joinToString("_")
-                                db.child("balances").child(pairId).get()
-                                    .addOnSuccessListener { balSnap ->
-                                        val balance =
-                                            (balSnap.child(currentUid).getValue(Double::class.java)
-                                                ?: 0.0)
-                                        friends.add(FriendData(friendUid, name, balance))
-                                        // ✅ Emit updated list
-                                        onResult(friends.toList())
-                                    }
-                            }
-                        }
                 }
 
                 override fun onCancelled(error: DatabaseError) {}
             })
     }
+
+
+    fun removeFriend(uniqueId: String, onComplete: (Boolean, String) -> Unit) {
+        val myId = currentUid ?: return onComplete(false, "User not logged in")
+
+        val updates = hashMapOf<String, Any?>(
+            "users/$myId/friends/$uniqueId" to null,
+            "users/$uniqueId/friends/$myId" to null
+        )
+
+        db.updateChildren(updates)
+            .addOnSuccessListener {
+                onComplete(true, "Friend removed successfully")
+            }
+            .addOnFailureListener { e ->
+                onComplete(false, e.message ?: "Failed to remove friend")
+            }
+    }
+
 
 }
 

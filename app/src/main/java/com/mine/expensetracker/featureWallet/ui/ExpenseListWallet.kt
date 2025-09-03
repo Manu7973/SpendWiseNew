@@ -104,6 +104,7 @@ class ExpenseListWallet {
         val expenses by viewModel.expenses.collectAsState()
         val context = LocalContext.current
         var showAddExpenseScreen by remember { mutableStateOf(false) }
+        var showSettleUpDialog by remember { mutableStateOf(false) }
         val title = if (showAddExpenseScreen) "Add Expense" else "Expense"
         val myId = SharedPref.getString(context, Constants.UID)
 
@@ -227,7 +228,7 @@ class ExpenseListWallet {
                                             false
                                         )
                                     } else {
-                                        // settle logic
+                                        showSettleUpDialog = true
                                     }
                                 },
                                 colors = ButtonDefaults.buttonColors(
@@ -267,7 +268,8 @@ class ExpenseListWallet {
                             contentPadding = PaddingValues(horizontal = 10.dp, vertical = 8.dp)
                         ) {
                             items(expenses, key = { it.id }) { expense ->
-                                ExpenseItem(selectedFriendId,
+                                ExpenseItem(
+                                    selectedFriendId,
                                     viewModel,
                                     expense = expense,
                                     onClick = {
@@ -278,6 +280,45 @@ class ExpenseListWallet {
                         }
                     }
                 }
+            }
+
+            if (showSettleUpDialog) {
+                AlertDialog(
+                    onDismissRequest = { showSettleUpDialog = false },
+                    title = { Text("Settle Up Expense") },
+                    text = { Text("Are you sure you want to settle up expense with ${expenseAddedForName} of amount ₹${netAmount}?") },
+                    confirmButton = {
+                        TextButton(onClick = {
+                            viewModel.settleUpTransactions(
+                                "1",
+                                myId,
+                                selectedFriendId,
+                                onResult = { onResult ->
+                                    if (onResult) {
+                                        CustomToast.showToast(
+                                            context,
+                                            context.getString(R.string.settledup),
+                                            false
+                                        )
+                                    } else {
+                                        CustomToast.showToast(
+                                            context,
+                                            context.getString(R.string.unableToProcess),
+                                            false
+                                        )
+                                    }
+                                })
+                            showSettleUpDialog = false
+                        }) {
+                            Text("Settle Up", color = Warning)
+                        }
+                    },
+                    dismissButton = {
+                        TextButton(onClick = { showSettleUpDialog = false }) {
+                            Text("Cancel", color = TextBlack)
+                        }
+                    }, containerColor = ThinGrey
+                )
             }
         }
     }
@@ -519,7 +560,25 @@ class ExpenseListWallet {
                 text = { Text("Are you sure you want to delete ${expense.name}?") },
                 confirmButton = {
                     TextButton(onClick = {
-                        viewModel.deleteExpense(expense.id, myId, selectedFriend)
+                        viewModel.deleteExpense(
+                            expense.id,
+                            myId,
+                            selectedFriend,
+                            onResult = { onResult ->
+                                if (onResult) {
+                                    CustomToast.showToast(
+                                        context,
+                                        context.getString(R.string.expenseDeleted),
+                                        false
+                                    )
+                                } else {
+                                    CustomToast.showToast(
+                                        context,
+                                        context.getString(R.string.unableToProcess),
+                                        false
+                                    )
+                                }
+                            })
                         showDeleteDialog = false
                     }) {
                         Text("Delete", color = Warning)
@@ -529,7 +588,7 @@ class ExpenseListWallet {
                     TextButton(onClick = { showDeleteDialog = false }) {
                         Text("Cancel", color = TextBlack)
                     }
-                },containerColor = ThinGrey
+                }, containerColor = ThinGrey
             )
         }
     }
