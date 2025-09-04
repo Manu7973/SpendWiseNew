@@ -2,6 +2,7 @@ package com.mine.expensetracker.featureWallet.ui
 
 import android.app.Activity
 import android.content.Context
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -182,6 +183,7 @@ class ExpenseWallet {
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         items(friendsList) { friend ->
+                            Log.d("balancecheck", "$friend.balance")
                             val (status, color) = when {
                                 friend.balance > 0 -> "Gets ₹${friend.balance}" to Green
                                 friend.balance < 0 -> "You owe ₹${-friend.balance}" to Warning
@@ -189,7 +191,7 @@ class ExpenseWallet {
                             }
 
                             FriendItem(
-                                name = friend.name,
+                                friend = friend,
                                 status = status,
                                 statusColor = color,
                                 onClick = { onFriendClick(friend) },
@@ -210,7 +212,7 @@ class ExpenseWallet {
                         confirmButton = {
                             TextButton(onClick = {
                                 friendsViewModel.removeFriend(
-                                    friendCode ,
+                                    friendCode,
                                     onComplete = { success, message ->
                                         {
                                             if (success) {
@@ -336,16 +338,15 @@ class ExpenseWallet {
 
     @Composable
     fun FriendItem(
-        name: String,
+        friend: FriendData,
         status: String,
         statusColor: Color,
         modifier: Modifier = Modifier,
-        onClick: (String) -> Unit, // pass friend id/name back when clicked
-        onLongClick: (String) -> Unit// pass friend id/name back when clicked
+        onClick: (FriendData) -> Unit,
+        onLongClick: (FriendData) -> Unit
     ) {
-        // Pick a stable random color
-        val avatarColor = remember(name) {
-            avatarColors[name.hashCode().absoluteValue % avatarColors.size]
+        val avatarColor = remember(friend.name) {
+            avatarColors[friend.name.hashCode().absoluteValue % avatarColors.size]
         }
 
         Row(
@@ -353,15 +354,13 @@ class ExpenseWallet {
                 .fillMaxWidth()
                 .pointerInput(Unit) {
                     detectTapGestures(
-                        onTap = { onClick(name) },
-                        onLongPress = { onLongClick(name) }
+                        onTap = { onClick(friend) },
+                        onLongPress = { onLongClick(friend) }
                     )
                 }
-//                .clickable { onClick(name) } // 👈 action on click
                 .padding(horizontal = 16.dp, vertical = 12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Circle avatar
             Box(
                 modifier = Modifier
                     .size(40.dp)
@@ -369,7 +368,7 @@ class ExpenseWallet {
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    text = name.first().uppercase(),
+                    text = friend.name.first().uppercase(),
                     fontWeight = FontWeight.Bold,
                     fontSize = 18.sp,
                     color = Color.Black
@@ -378,10 +377,9 @@ class ExpenseWallet {
 
             Spacer(modifier = Modifier.width(12.dp))
 
-            // Name + status
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = name,
+                    text = friend.name,
                     fontWeight = FontWeight.SemiBold,
                     fontSize = 16.sp
                 )
@@ -392,7 +390,6 @@ class ExpenseWallet {
                 )
             }
 
-            // Right arrow
             Icon(
                 imageVector = Icons.Default.KeyboardArrowRight,
                 contentDescription = "Go to details",

@@ -225,25 +225,23 @@ class ExpenseView {
                     .background(Secondary),
                 contentAlignment = Alignment.Center
             ) {
-                if (profileImageUri != null) {
+                if (profileImageUri != null && !profileImageUri.toString().isEmpty()) {
                     Image(
                         painter = rememberAsyncImagePainter(profileImageUri),
                         contentDescription = "Profile Image",
                         modifier = Modifier
                             .size(45.dp)
                             .clip(CircleShape)
-                            .background(ThemePrimary),
-                        contentScale = ContentScale.Crop
+                        ,contentScale = ContentScale.Crop
                     )
                 } else {
-                    val profile by rememberLottieComposition(
-                        LottieCompositionSpec.RawRes(R.raw.profile_dummy)
-                    )
-
-                    LottieAnimation(
-                        composition = profile,
-                        iterations = LottieConstants.IterateForever,
-                        modifier = Modifier.size(45.dp)
+                    Image(
+                        painter = painterResource(id = R.drawable.dummy_display_pic),
+                        contentDescription = "Profile Image",
+                        modifier = Modifier
+                            .size(45.dp)
+                            .clip(CircleShape)
+                        ,contentScale = ContentScale.Crop
                     )
                 }
             }

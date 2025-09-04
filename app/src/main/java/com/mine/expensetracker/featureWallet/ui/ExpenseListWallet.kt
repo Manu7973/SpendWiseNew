@@ -399,7 +399,7 @@ class ExpenseListWallet {
             OutlinedTextField(
                 value = amount,
                 onValueChange = {
-                    if (it.all { c -> c.isDigit() }) {
+                    if (it.all { c -> c.isDigit() } && it.length <= 5) {
                         amount = it
                         if (it.isNotBlank()) {
                             amountError = false

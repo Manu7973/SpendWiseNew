@@ -5,6 +5,7 @@ import com.expense.expensetracker.utils.CustomToast
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.ServerValue
 import com.google.firebase.database.ValueEventListener
 import com.mine.expensetracker.featureWallet.data.ExpenseData
 import com.mine.expensetracker.featureWallet.ui.ExpenseListWallet.ExpenseType
@@ -78,6 +79,34 @@ class ExpenseRepository {
             "${expense.friendID}/friends/${expense.myId}/expenses/${expense.id}" to friendExpenseMap
         )
 
+        val pairId = listOf(expense.myId, expense.friendID).sorted().joinToString("_")
+
+        when (expense.type) {
+            1 -> { // Paid by you, split equally
+                val half = expense.amount / 2
+                updates["balances/$pairId/${expense.myId}"] = ServerValue.increment(half)
+                updates["balances/$pairId/${expense.friendID}"] = ServerValue.increment(-half)
+            }
+
+            2 -> { // You are owed full
+                updates["balances/$pairId/${expense.myId}"] = ServerValue.increment(expense.amount)
+                updates["balances/$pairId/${expense.friendID}"] =
+                    ServerValue.increment(-expense.amount)
+            }
+
+            3 -> { // Friend paid, split equally
+                val half = expense.amount / 2
+                updates["balances/$pairId/${expense.friendID}"] = ServerValue.increment(half)
+                updates["balances/$pairId/${expense.myId}"] = ServerValue.increment(-half)
+            }
+
+            4 -> { // Friend is owed full
+                updates["balances/$pairId/${expense.friendID}"] =
+                    ServerValue.increment(expense.amount)
+                updates["balances/$pairId/${expense.myId}"] = ServerValue.increment(-expense.amount)
+            }
+        }
+
         dbRef.updateChildren(updates)
     }
 
@@ -111,26 +140,69 @@ class ExpenseRepository {
         })
     }
 
+//    fun deleteExpense(
+//        expenseId: String,
+//        myId: String,
+//        friendId: String,
+//        onResult: (Boolean) -> Unit
+//    ) {
+//        val updates = hashMapOf<String, Any?>(
+//            "$myId/friends/$friendId/expenses/$expenseId" to null,
+//            "$friendId/friends/$myId/expenses/$expenseId" to null
+//        )
+//
+//        dbRef.updateChildren(updates)
+//            .addOnSuccessListener {
+//                Log.d("DeleteExpense", "Deleted successfully: $expenseId")
+//                onResult(true)
+//            }
+//            .addOnFailureListener { e ->
+//                Log.e("DeleteExpense", "Failed to delete", e)
+//                onResult(false)
+//            }
+//    }
+
     fun deleteExpense(
         expenseId: String,
         myId: String,
         friendId: String,
         onResult: (Boolean) -> Unit
     ) {
-        val updates = hashMapOf<String, Any?>(
-            "$myId/friends/$friendId/expenses/$expenseId" to null,
-            "$friendId/friends/$myId/expenses/$expenseId" to null
-        )
+        val expenseRef =
+            dbRef.child(myId).child("friends").child(friendId).child("expenses").child(expenseId)
 
-        dbRef.updateChildren(updates)
-            .addOnSuccessListener {
-                Log.d("DeleteExpense", "Deleted successfully: $expenseId")
-                onResult(true)
+        expenseRef.addListenerForSingleValueEvent(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                val expense = snapshot.getValue(ExpenseData::class.java)
+                if (expense == null) {
+                    onResult(false)
+                    return
+                }
+
+                val pairId = listOf(myId, friendId).sorted().joinToString("_")
+                val updates = hashMapOf<String, Any?>(
+                    "$myId/friends/$friendId/expenses/$expenseId" to null,
+                    "$friendId/friends/$myId/expenses/$expenseId" to null,
+                    // ✅ Adjust balances (subtract deleted amount)
+                    "balances/$pairId/${expense.myId}" to ServerValue.increment(-expense.amount),
+                    "balances/$pairId/${expense.friendID}" to ServerValue.increment(expense.amount)
+                )
+
+                dbRef.updateChildren(updates)
+                    .addOnSuccessListener {
+                        Log.d("DeleteExpense", "Deleted successfully: $expenseId, balances updated")
+                        onResult(true)
+                    }
+                    .addOnFailureListener { e ->
+                        Log.e("DeleteExpense", "Failed to delete", e)
+                        onResult(false)
+                    }
             }
-            .addOnFailureListener { e ->
-                Log.e("DeleteExpense", "Failed to delete", e)
+
+            override fun onCancelled(error: DatabaseError) {
                 onResult(false)
             }
+        })
     }
 
     fun settleUpTransactions(
@@ -139,16 +211,21 @@ class ExpenseRepository {
         friendId: String,
         onResult: (Boolean) -> Unit
     ) {
+        val pairId = listOf(myId, friendId).sorted().joinToString("_")
+
         val updates = hashMapOf<String, Any?>(
-            "$myId/friends/$friendId/expenses" to mapOf<String, Any>(),
-            "$friendId/friends/$myId/expenses" to mapOf<String, Any>(),
+            "$myId/friends/$friendId/expenses" to null,
+            "$friendId/friends/$myId/expenses" to null,
             "$myId/friends/$friendId/isFriend" to true,
-            "$friendId/friends/$myId/isFriend" to true
+            "$friendId/friends/$myId/isFriend" to true,
+            // ✅ Reset balances for both users
+            "balances/$pairId/$myId" to 0,
+            "balances/$pairId/$friendId" to 0
         )
 
         dbRef.updateChildren(updates)
             .addOnSuccessListener {
-                Log.d("SettleUp", "All expenses cleared but friendship kept")
+                Log.d("SettleUp", "Expenses + balances cleared, friendship kept")
                 onResult(true)
             }
             .addOnFailureListener { e ->
@@ -156,5 +233,30 @@ class ExpenseRepository {
                 onResult(false)
             }
     }
+
+
+//    fun settleUpTransactions(
+//        expenseId: String,
+//        myId: String,
+//        friendId: String,
+//        onResult: (Boolean) -> Unit
+//    ) {
+//        val updates = hashMapOf<String, Any?>(
+//            "$myId/friends/$friendId/expenses" to mapOf<String, Any>(),
+//            "$friendId/friends/$myId/expenses" to mapOf<String, Any>(),
+//            "$myId/friends/$friendId/isFriend" to true,
+//            "$friendId/friends/$myId/isFriend" to true
+//        )
+//
+//        dbRef.updateChildren(updates)
+//            .addOnSuccessListener {
+//                Log.d("SettleUp", "All expenses cleared but friendship kept")
+//                onResult(true)
+//            }
+//            .addOnFailureListener { e ->
+//                Log.e("SettleUp", "Failed to settle up", e)
+//                onResult(false)
+//            }
+//    }
 
 }

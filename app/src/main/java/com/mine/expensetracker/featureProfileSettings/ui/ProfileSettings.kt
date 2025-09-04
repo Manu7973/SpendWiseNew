@@ -143,7 +143,7 @@ class ProfileSettings() {
                 contentAlignment = Alignment.BottomEnd
             ) {
                 // Profile image
-                if (profileImageUri != null) {
+                if (profileImageUri != null &&  !profileImageUri.toString().isEmpty()) {
                     Log.d("ProfileViewModel", "HeaderProfile: $profileImageUri")
                     Image(
                         painter = rememberAsyncImagePainter(profileImageUri),
@@ -151,15 +151,14 @@ class ProfileSettings() {
                         modifier = Modifier
                             .size(120.dp)
                             .clip(CircleShape)
-                            .background(ThemePrimary),
-                        contentScale = ContentScale.Crop
+                        ,contentScale = ContentScale.Crop
                     )
                 } else {
                     Image(
                         painter = painterResource(id = R.drawable.dummy_display_pic),
                         contentDescription = "Profile Picture",
                         modifier = Modifier
-                            .size(120.dp).background(Grey)
+                            .size(120.dp)
                             .clip(CircleShape),
                         contentScale = ContentScale.Crop
                     )
@@ -172,7 +171,7 @@ class ProfileSettings() {
                     modifier = Modifier
                         .size(28.dp)
                         .clip(CircleShape)
-                        .background(ThinThemePrimary)
+                        .background(ThemePrimary)
                         .align(Alignment.BottomEnd)
                 ) {
                     Icon(

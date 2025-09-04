@@ -11,7 +11,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
 class FriendsViewModel(private val repo: FriendsRepository) : ViewModel() {
-
     private val _friends = MutableStateFlow<List<FriendData>>(emptyList())
     val friends: StateFlow<List<FriendData>> = _friends
 
