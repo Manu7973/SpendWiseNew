@@ -18,3 +18,11 @@ It helps you easily manage, track, and analyze your expenses.
 - Suggesting best practices for Jetpack Compose and Kotlin.
 - Debugging and optimizing code.
 - Providing documentation and README formatting guidance.
+
+# App Screenshots
+
+## Home Screen
+![Home Screen](https://github.com/<your-username>/<your-repo>/blob/main/screenshots/home.png?raw=true)
+
+## Profile Screen
+![Profile Screen](https://github.com/<your-username>/<your-repo>/blob/main/screenshots/profile.png?raw=true)
